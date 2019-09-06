@@ -1,4 +1,5 @@
 arith.cmm
+arith-with-memory.cmm
 catch-rec.cmm
 catch-try.cmm
 catch-float.cmm
