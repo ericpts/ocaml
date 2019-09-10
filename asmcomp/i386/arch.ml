@@ -47,10 +47,24 @@ type specific_operation =
   | Ifloatarithmem of bool * float_operation * addressing_mode
                                         (* Float arith operation with memory *)
                                         (* bool: true=64 bits, false=32 *)
+  | Iintarithmem of int_operation * addressing_mode
+                                        (* Int arithmetic operation with memory.
+                                           Currently only loads are supported.*)
   | Ifloatspecial of string
 
 and float_operation =
     Ifloatadd | Ifloatsub | Ifloatsubrev | Ifloatmul | Ifloatdiv | Ifloatdivrev
+
+and int_operation =
+    Iintadd
+  | Iintsub
+  | Iintmul
+  | Iintand
+  | Iintor
+  | Iintxor
+  | Iintlsl
+  | Iintlsr
+  | Iintasr
 
 let spacetime_node_hole_pointer_is_live_before _specific_op = false
 
@@ -150,6 +164,22 @@ let print_specific_operation printreg op ppf arg =
       let long = if double then "float64" else "float32" in
       fprintf ppf "%a %s %s[%a]" printreg arg.(0) (op_name op) long
        (print_addressing printreg addr) (Array.sub arg 1 (Array.length arg - 1))
+  | Iintarithmem(op, addr) ->
+    let op_name = function
+      | Iintadd -> "+"
+      | Iintsub -> "-"
+      | Iintmul -> "*"
+      | Iintand -> "&"
+      | Iintor -> "|"
+      | Iintxor -> "^"
+      | Iintlsl -> "<<"
+      | Iintlsr -> ">>u"
+      | Iintasr -> ">>s"
+    in
+    fprintf ppf "%a %s int[%a]" printreg arg.(0)
+      (op_name op)
+      (print_addressing printreg addr)
+      (Array.sub arg 1 (Array.length arg - 1))
   | Ifloatspecial name ->
       fprintf ppf "%s " name;
       for i = 0 to Array.length arg - 1 do

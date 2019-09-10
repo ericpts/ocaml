@@ -327,6 +327,17 @@ let instr_for_floatarithmem = function
   | Ifloatdiv -> I.fdiv
   | Ifloatdivrev -> I.fdivr
 
+let instr_for_intarithmem = function
+  | Iintadd -> I.add
+  | Iintsub -> I.sub
+  | Iintmul -> (fun arg1 arg2 -> I.imul arg1 (Some arg2))
+  | Iintand -> I.and_
+  | Iintor -> I.or_
+  | Iintxor -> I.xor
+  | Iintlsl -> I.sal
+  | Iintlsr -> I.shr
+  | Iintasr -> I.sar
+
 let cond = function
   | Isigned Ceq   -> E   | Isigned Cne   -> NE
   | Isigned Cle   -> LE  | Isigned Cgt   -> G
@@ -791,6 +802,10 @@ let emit_instr fallthrough i =
       instr_for_floatarithmem op
           (addressing addr
              (if double then REAL8 else REAL4) i 1)
+  | Lop(Ispecific(Iintarithmem(op, addr))) ->
+    instr_for_intarithmem op
+      (addressing addr DWORD i 1)
+      (reg i.res.(0))
   | Lop(Ispecific(Ifloatspecial s)) ->
       (* Push args on float stack if necessary *)
       for k = 0 to Array.length i.arg - 1 do

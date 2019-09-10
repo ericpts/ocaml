@@ -277,9 +277,8 @@ method select_intarith regular_op (mem_op : Arch.int_operation) commutative args
   | [arg1; Cop(Cload ((Word_int as chunk), _), [loc2], _)] ->
       let (addr, arg2) = self#select_addressing chunk loc2 in
       (Ispecific(Iintarithmem(mem_op, addr)), [arg1; arg2])
-  | [Cop(Cload ((Word_int as chunk), Asttypes.Mutable), [loc1], _); arg2] when
-      commutative
-       ->
+  | [Cop(Cload ((Word_int as chunk), _), [loc1], _); arg2]
+    when commutative ->
       let (addr, arg1) = self#select_addressing chunk loc1 in
       (Ispecific(Iintarithmem(mem_op, addr)), [arg2; arg1])
   | [_; _] ->
